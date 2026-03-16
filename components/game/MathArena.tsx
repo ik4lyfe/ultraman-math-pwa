@@ -15,31 +15,20 @@ export function MathArena({ onAttack }: MathArenaProps) {
   const [timeLeft, setTimeLeft] = useState(15);
   const [isProcessing, setIsProcessing] = useState(false);
   const isProcessingRef = useRef(false);
-  
+
   const currentQ = questions[currentQuestionIndex];
 
   useEffect(() => {
     if (!currentQ) return;
-    
+
     // Reset timer on new question
     setTimeLeft(15);
     setIsProcessing(false);
     isProcessingRef.current = false;
     triggerColorTimerSFX.stop();
-    
+
     const timer = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          handleAnswer(null); // Time out = wrong
-          return 0;
-        }
-        if (prev === 4) {
-          // Play requested color timer YouTube warning sound exact when the bar is about to turn red
-          triggerColorTimerSFX.play();
-        }
-        return prev - 1;
-      });
+      setTimeLeft((prev) => (prev > 0 ? prev - 1 : 0));
     }, 1000);
 
     return () => {
@@ -49,6 +38,18 @@ export function MathArena({ onAttack }: MathArenaProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentQuestionIndex, currentQ]);
 
+  // Handle side-effects of timer reaching certain values
+  useEffect(() => {
+    if (timeLeft === 4) {
+      // Play requested color timer YouTube warning sound exact when the bar is about to turn red
+      triggerColorTimerSFX.play();
+    } else if (timeLeft === 0 && !isProcessingRef.current) {
+      // Time out = wrong
+      handleAnswer(null);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [timeLeft]);
+
   const handleAnswer = (selected: number | null) => {
     if (isProcessingRef.current) return;
     setIsProcessing(true);
@@ -57,7 +58,7 @@ export function MathArena({ onAttack }: MathArenaProps) {
     triggerColorTimerSFX.stop();
     if (!currentQ) return;
     const isCorrect = selected === currentQ.answer;
-    
+
     const soundSrc = isCorrect ? "/assets/sounds/correct.wav" : "/assets/sounds/wrong.wav";
     new Howl({ src: [soundSrc], volume: 0.6 }).play();
 
@@ -77,7 +78,7 @@ export function MathArena({ onAttack }: MathArenaProps) {
           </span>
         </div>
         <div className="h-2 w-full bg-zinc-900 rounded-full overflow-hidden">
-          <motion.div 
+          <motion.div
             className={`h-full ${timeLeft <= 3 ? "bg-red-600 animate-color-timer" : "bg-cyan-400"}`}
             initial={{ width: "100%" }}
             animate={{ width: `${(timeLeft / 15) * 100}%` }}
