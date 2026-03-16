@@ -13,20 +13,22 @@ export const triggerColorTimerSFX = {
 
 export function BGMPlayer() {
   const { isMusicPlaying, setMusicPlaying } = useGameStore();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const playerRef = useRef<any>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const sfxRef = useRef<any>(null);
   const [isReady, setIsReady] = useState(false);
-  const [isSfxReady, setIsSfxReady] = useState(false);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const onReady = (event: any) => {
     playerRef.current = event.target;
     setIsReady(true);
     event.target.setVolume(20);
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const onSfxReady = (event: any) => {
     sfxRef.current = event.target;
-    setIsSfxReady(true);
     event.target.setVolume(100);
     
     // Wire up global SFX trigger
