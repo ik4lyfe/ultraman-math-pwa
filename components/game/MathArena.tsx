@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useGameStore } from "@/lib/store";
 import { Howl } from "howler";
@@ -14,6 +14,7 @@ export function MathArena({ onAttack }: MathArenaProps) {
   const { questions, currentQuestionIndex } = useGameStore();
   const [timeLeft, setTimeLeft] = useState(15);
   const [isProcessing, setIsProcessing] = useState(false);
+  const isProcessingRef = useRef(false);
   
   const currentQ = questions[currentQuestionIndex];
 
@@ -23,6 +24,7 @@ export function MathArena({ onAttack }: MathArenaProps) {
     // Reset timer on new question
     setTimeLeft(15);
     setIsProcessing(false);
+    isProcessingRef.current = false;
     triggerColorTimerSFX.stop();
     
     const timer = setInterval(() => {
@@ -48,8 +50,9 @@ export function MathArena({ onAttack }: MathArenaProps) {
   }, [currentQuestionIndex, currentQ]);
 
   const handleAnswer = (selected: number | null) => {
-    if (isProcessing) return;
+    if (isProcessingRef.current) return;
     setIsProcessing(true);
+    isProcessingRef.current = true;
 
     triggerColorTimerSFX.stop();
     if (!currentQ) return;
