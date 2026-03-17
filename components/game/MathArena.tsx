@@ -15,41 +15,10 @@ export function MathArena({ onAttack }: MathArenaProps) {
   const [timeLeft, setTimeLeft] = useState(15);
   const [isProcessing, setIsProcessing] = useState(false);
   const isProcessingRef = useRef(false);
-
+  
   const currentQ = questions[currentQuestionIndex];
 
-  useEffect(() => {
-    if (!currentQ) return;
-
-    // Reset timer on new question
-    setTimeLeft(15);
-    setIsProcessing(false);
-    isProcessingRef.current = false;
-    triggerColorTimerSFX.stop();
-
-    const timer = setInterval(() => {
-      setTimeLeft((prev) => (prev > 0 ? prev - 1 : 0));
-    }, 1000);
-
-    return () => {
-      clearInterval(timer);
-      triggerColorTimerSFX.stop();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentQuestionIndex, currentQ]);
-
-  // Handle side-effects of timer reaching certain values
-  useEffect(() => {
-    if (timeLeft === 4) {
-      // Play requested color timer YouTube warning sound exact when the bar is about to turn red
-      triggerColorTimerSFX.play();
-    } else if (timeLeft === 0 && !isProcessingRef.current) {
-      // Time out = wrong
-      handleAnswer(null);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [timeLeft]);
-
+  // We define handleAnswer first so our interval can use it safely
   const handleAnswer = (selected: number | null) => {
     if (isProcessingRef.current) return;
     setIsProcessing(true);
@@ -58,12 +27,51 @@ export function MathArena({ onAttack }: MathArenaProps) {
     triggerColorTimerSFX.stop();
     if (!currentQ) return;
     const isCorrect = selected === currentQ.answer;
-
+    
     const soundSrc = isCorrect ? "/assets/sounds/correct.wav" : "/assets/sounds/wrong.wav";
     new Howl({ src: [soundSrc], volume: 0.6 }).play();
 
     onAttack(isCorrect);
   };
+
+  // Keep a stable ref to the LATEST handleAnswer to avoid all stale closure bugs in setInterval
+  const handleAnswerRef = useRef(handleAnswer);
+  useEffect(() => {
+    handleAnswerRef.current = handleAnswer;
+  });
+
+  useEffect(() => {
+    if (!currentQ) return;
+
+    // Reset everything internally for the new question cycle
+    setTimeLeft(15);
+    setIsProcessing(false);
+    isProcessingRef.current = false;
+    triggerColorTimerSFX.stop();
+
+    let seconds = 15;
+
+    const timer = setInterval(() => {
+      // If we are already displaying combat animations, pause the clock internally
+      if (isProcessingRef.current) return;
+
+      seconds--;
+      setTimeLeft(seconds);
+
+      if (seconds === 4) {
+        triggerColorTimerSFX.play();
+      } else if (seconds <= 0) {
+        clearInterval(timer);
+        handleAnswerRef.current(null); // safely triggers the time out!
+      }
+    }, 1000);
+
+    return () => {
+      clearInterval(timer);
+      triggerColorTimerSFX.stop();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentQuestionIndex]); // Safe to run only on index change because index fully represents the current question
 
   if (!currentQ) return null;
 
