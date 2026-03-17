@@ -11,8 +11,8 @@ import { generateQuestions } from "./questionGenerator";
 // - kaijuImage: The image file used for the enemy (place in public/assets/images/)
 // ============================================================================
 export const STAGE_CONFIG = [
-  { level: 1, ultramanName: "ULTRAMAN", ultramanImage: "ultraman_idle.png", kaijuName: "BALTAN", kaijuImage: "baltan.png" },
-  { level: 2, ultramanName: "ULTRAMAN TIGA", ultramanImage: "ultraman_idle.png", kaijuName: "GOMORA", kaijuImage: "gomora.png" },
+  { level: 1, ultramanName: "ULTRAMAN TIGA", ultramanImage: "ultraman_tiga.png", kaijuName: "KING MOLERAT", kaijuImage: "king_molerat.png" },
+  { level: 2, ultramanName: "ULTRAMAN MEBIUS", ultramanImage: "ultraman_mebius.png", kaijuName: "GUDON", kaijuImage: "gudon.png" },
   { level: 3, ultramanName: "ULTRAMAN ZERO", ultramanImage: "ultraman_idle.png", kaijuName: "ZETTON", kaijuImage: "zetton.png" },
   { level: 4, ultramanName: "ULTRAMAN BLAZAR", ultramanImage: "ultraman_idle.png", kaijuName: "TYRANT", kaijuImage: "gomora.png" },
   { level: 5, ultramanName: "ULTRAMAN NOA", ultramanImage: "ultraman_idle.png", kaijuName: "BELIAL", kaijuImage: "zetton.png" },
