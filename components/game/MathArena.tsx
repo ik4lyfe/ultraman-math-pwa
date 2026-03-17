@@ -13,21 +13,19 @@ interface MathArenaProps {
 export function MathArena({ onAttack }: MathArenaProps) {
   const { questions, currentQuestionIndex } = useGameStore();
   const [timeLeft, setTimeLeft] = useState(15);
-  const [isProcessing, setIsProcessing] = useState(false);
   const isProcessingRef = useRef(false);
-  
+
   const currentQ = questions[currentQuestionIndex];
 
   // We define handleAnswer first so our interval can use it safely
   const handleAnswer = (selected: number | null) => {
     if (isProcessingRef.current) return;
-    setIsProcessing(true);
     isProcessingRef.current = true;
 
     triggerColorTimerSFX.stop();
     if (!currentQ) return;
     const isCorrect = selected === currentQ.answer;
-    
+
     const soundSrc = isCorrect ? "/assets/sounds/correct.wav" : "/assets/sounds/wrong.wav";
     new Howl({ src: [soundSrc], volume: 0.6 }).play();
 
@@ -45,7 +43,6 @@ export function MathArena({ onAttack }: MathArenaProps) {
 
     // Reset everything internally for the new question cycle
     setTimeLeft(15);
-    setIsProcessing(false);
     isProcessingRef.current = false;
     triggerColorTimerSFX.stop();
 
